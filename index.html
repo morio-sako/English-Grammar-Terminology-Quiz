@@ -1,0 +1,320 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英文法用語 定着度チェックテスト</title>
+    <style>
+        body {
+            font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .question-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .question-text {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+        }
+        .options {
+            list-style-type: none;
+            padding: 0;
+        }
+        .options li {
+            margin-bottom: 10px;
+        }
+        label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        label:hover {
+            background-color: #f1f1f1;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        .feedback {
+            margin-top: 10px;
+            font-weight: bold;
+            display: none;
+        }
+        .correct {
+            color: #27ae60;
+            font-size: 1.3em;
+        }
+        .incorrect {
+            color: #e74c3c;
+            font-size: 1.5em; /* バツを強調 */
+            background-color: #fadbd8;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .explanation {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+            display: none;
+        }
+        .btn-container {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+        button {
+            font-size: 1.2em;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        #submit-btn {
+            background-color: #3498db;
+            color: white;
+        }
+        #submit-btn:hover {
+            background-color: #2980b9;
+        }
+        #retry-btn {
+            background-color: #f39c12;
+            color: white;
+            display: none;
+            margin-left: 10px;
+        }
+        #retry-btn:hover {
+            background-color: #d68910;
+        }
+        #result-area {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>英文法用語 定着度チェックテスト</h1>
+    <div id="result-area"></div>
+    <form id="quiz-form">
+        <div id="quiz-container">
+            </div>
+
+        <div class="btn-container">
+            <button type="button" id="submit-btn" onclick="checkAnswers()">採点する</button>
+            <button type="button" id="retry-btn" onclick="resetQuiz()">もう一回チャレンジする</button>
+        </div>
+    </form>
+
+    <script>
+        // 問題データの配列
+        const quizData = [
+            {
+                question: "1. 「美しい花」の「美しい」のように、名詞を詳しく説明する（飾る）言葉を何と言いますか？",
+                options: ["形容詞", "副詞", "動詞", "名詞"],
+                answer: 0
+            },
+            {
+                question: "2. 「走る」「食べる」のように、動作や状態を表す言葉を何と言いますか？",
+                options: ["名詞", "形容詞", "動詞", "補語"],
+                answer: 2
+            },
+            {
+                question: "3. 文の中で「?は」「?が」にあたる、文の主人公となる要素を何と言いますか？",
+                options: ["目的語", "主語", "補語", "述語動詞"],
+                answer: 1
+            },
+            {
+                question: "4. 主語の状態を補って説明し、「S＝（　）」の関係になる要素を何と言いますか？",
+                options: ["修飾語", "副詞", "目的語", "補語"],
+                answer: 3
+            },
+            {
+                question: "5. 「速く走る」の「速く」のように、名詞以外の言葉（動詞や形容詞など）を詳しく説明する言葉を何と言いますか？",
+                options: ["形容詞", "副詞", "動詞", "前置詞"],
+                answer: 1
+            },
+            {
+                question: "6. 2語以上のかたまりで、その中に「主語＋動詞」が含まれていないものを何と言いますか？",
+                options: ["節", "句", "文", "修飾語"],
+                answer: 1
+            },
+            {
+                question: "7. 2語以上のかたまりで、その中に「主語＋動詞」が含まれているものを何と言いますか？",
+                options: ["句", "自動詞", "節", "先行詞"],
+                answer: 2
+            },
+            {
+                question: "8. 目的語（「?を」「?に」）がなくても、それだけで意味が通じる動詞を何と言いますか？",
+                options: ["他動詞", "助動詞", "述語動詞", "自動詞"],
+                answer: 3
+            },
+            {
+                question: "9. \"When I was young,\" のように、かたまり全体で「時」や「理由」などの意味を持ち、文全体を修飾する「主語＋動詞」を含むかたまりを何と言いますか？",
+                options: ["副詞節", "名詞節", "形容詞句", "副詞句"],
+                answer: 0
+            },
+            {
+                question: "10. 目的語（「?を」「?に」）が後ろに絶対に必要になる動詞を何と言いますか？",
+                options: ["自動詞", "他動詞", "補語", "修飾語"],
+                answer: 1
+            },
+            {
+                question: "11. \"The window was broken by him.\" のように、「?される」という受け身の意味を表す形を何と言いますか？",
+                options: ["能動態", "完了形", "受動態", "仮定法"],
+                answer: 2
+            },
+            {
+                question: "12. \"can\" や \"will\" のように、動詞の意味を助けて「?できる」「?だろう」などの意味を加える言葉を何と言いますか？",
+                options: ["自動詞", "不定詞", "現在分詞", "助動詞"],
+                answer: 3
+            },
+            {
+                question: "13. 「to ＋ 動詞の原形」の形をとり、名詞・形容詞・副詞の3つの働きをするものを何と言いますか？",
+                options: ["動名詞", "不定詞", "過去分詞", "関係代名詞"],
+                answer: 1
+            },
+            {
+                question: "14. 動詞にingをつけて「?すること」という意味になり、名詞と同じ働きをするものを何と言いますか？",
+                options: ["動名詞", "現在分詞", "不定詞", "受動態"],
+                answer: 0
+            },
+            {
+                question: "15. 関係代名詞のすぐ前にあり、関係代名詞のカタマリによって後ろから詳しく説明される名詞のことを何と言いますか？",
+                options: ["修飾語", "補語", "目的語", "先行詞"],
+                answer: 3
+            }
+        ];
+
+        const quizContainer = document.getElementById('quiz-container');
+
+        // 問題を画面に表示する関数
+        function renderQuiz() {
+            quizContainer.innerHTML = '';
+            quizData.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.id = `q-container-${index}`;
+
+                const questionText = document.createElement('div');
+                questionText.className = 'question-text';
+                questionText.innerText = q.question;
+                questionDiv.appendChild(questionText);
+
+                const optionsList = document.createElement('ul');
+                optionsList.className = 'options';
+
+                q.options.forEach((opt, optIndex) => {
+                    const li = document.createElement('li');
+                    const label = document.createElement('label');
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `question${index}`;
+                    radio.value = optIndex;
+
+                    label.appendChild(radio);
+                    label.appendChild(document.createTextNode(opt));
+                    li.appendChild(label);
+                    optionsList.appendChild(li);
+                });
+
+                questionDiv.appendChild(optionsList);
+
+                // フィードバック（〇や×）を表示する領域
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'feedback';
+                feedbackDiv.id = `feedback-${index}`;
+                questionDiv.appendChild(feedbackDiv);
+
+                quizContainer.appendChild(questionDiv);
+            });
+        }
+
+        // 採点する関数
+        function checkAnswers() {
+            let score = 0;
+            let allAnswered = true;
+
+            quizData.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="question${index}"]:checked`);
+                const feedbackDiv = document.getElementById(`feedback-${index}`);
+                
+                if (!selected) {
+                    allAnswered = false;
+                    return;
+                }
+
+                const selectedValue = parseInt(selected.value);
+                feedbackDiv.style.display = 'block';
+
+                if (selectedValue === q.answer) {
+                    // 正解の場合
+                    feedbackDiv.innerHTML = '<span class="correct">〇 正解！</span>';
+                    score++;
+                } else {
+                    // 不正解の場合（×を強調し、正解を表示）
+                    const correctAnswerText = q.options[q.answer];
+                    feedbackDiv.innerHTML = `<span class="incorrect">× 不正解... 正解は「${correctAnswerText}」です</span>`;
+                }
+
+                // 採点後はラジオボタンを選択不可にする
+                const radios = document.querySelectorAll(`input[name="question${index}"]`);
+                radios.forEach(r => r.disabled = true);
+            });
+
+            if (!allAnswered) {
+                alert("未回答の問題があります。すべて答えてから採点してください。");
+                return;
+            }
+
+            // 結果表示
+            const resultArea = document.getElementById('result-area');
+            resultArea.innerHTML = `あなたの得点は ${quizData.length}問中 <span style="color:#e74c3c; font-size:1.5em;">${score}</span> 問正解です！`;
+            resultArea.style.display = 'block';
+
+            // ボタンの切り替え
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('retry-btn').style.display = 'inline-block';
+            
+            // ページ上部へスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // もう一回チャレンジする関数
+        function resetQuiz() {
+            document.getElementById('result-area').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'inline-block';
+            document.getElementById('retry-btn').style.display = 'none';
+            renderQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 初期表示
+        renderQuiz();
+    </script>
+</body>
+</html>
